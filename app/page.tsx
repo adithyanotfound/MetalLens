@@ -52,12 +52,15 @@ export default function Home() {
     load();
   }, [selected]);
 
-  // Log HPI, HEI and metals for the selected station (latest record)
+  // Log each row from database when station is selected
   useEffect(() => {
     if (!selected || measurements.length === 0) return;
-    const latest = measurements[measurements.length - 1];
     // eslint-disable-next-line no-console
-    console.log("Selected station:", selected.name, "HPI:", latest?.hpi, "HEI:", latest?.hei);
+    console.log("Selected station:", selected.name);
+    measurements.forEach((row, index) => {
+      // eslint-disable-next-line no-console
+      console.log(`Row ${index + 1}:`, row);
+    });
   }, [selected, measurements]);
 
   return (
@@ -142,7 +145,7 @@ export default function Home() {
             </div>
 
             <div className="bg-[#0b0f17] rounded p-3">
-              <div className="text-sm font-medium mb-2">Raw Data Preview</div>
+              <div className="text-sm font-medium mb-2">Data Preview</div>
               <div className="overflow-auto max-h-[260px]">
                 <table className="w-full text-xs">
                   <thead>
