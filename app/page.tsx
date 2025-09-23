@@ -1,103 +1,177 @@
-import Image from "next/image";
+"use client";
+import dynamic from "next/dynamic";
+import StateBarChart from "./components/StateBarChart";
+import ParameterLineChart from "./components/ParameterLineChart";
+import ResizableColumns from "./components/ResizableColumns";
+import { useEffect, useMemo, useState } from "react";
+import MetalsChart from "./components/MetalsChart";
+
+type Row = {
+  region: string;
+  hpi: number;
+  hei: number;
+};
+
+const sampleData: Row[] = [
+  { region: "India", hpi: 68.2, hei: 0.64 },
+  { region: "Maharashtra", hpi: 61.5, hei: 0.67 },
+  { region: "Karnataka", hpi: 63.3, hei: 0.69 },
+];
+
+type Station = { id: string | number; name: string; lat: number; lng: number };
+
+const IndiaMap = dynamic(() => import("./components/IndiaMap"), { ssr: false });
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [stations, setStations] = useState<Station[]>([]);
+  const [selected, setSelected] = useState<Station | null>(null);
+  const [measurements, setMeasurements] = useState<any[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/stations", { cache: "no-store" });
+        const json = await res.json();
+        setStations(json.rows ?? []);
+      } catch {}
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!selected) return setMeasurements([]);
+      try {
+        const res = await fetch(`/api/stations/${encodeURIComponent(String(selected.id))}`, { cache: "no-store" });
+        const json = await res.json();
+        setMeasurements(json.rows ?? []);
+      } catch {
+        setMeasurements([]);
+      }
+    };
+    load();
+  }, [selected]);
+
+  // Log HPI, HEI and metals for the selected station (latest record)
+  useEffect(() => {
+    if (!selected || measurements.length === 0) return;
+    const latest = measurements[measurements.length - 1];
+    // eslint-disable-next-line no-console
+    console.log("Selected station:", selected.name, "HPI:", latest?.hpi, "HEI:", latest?.hei);
+  }, [selected, measurements]);
+
+  return (
+    <div className="min-h-screen p-4 bg-[#0f1115] text-[#e5e7eb]">
+      <ResizableColumns
+        left={
+          <aside className="rounded-md bg-[#161a22] p-4 h-full hidden md:block">
+        <h2 className="text-sm font-semibold mb-3">Unitwise Selection</h2>
+        <div className="space-y-3 text-sm">
+          <div>
+            <div className="opacity-70 mb-1">Scope</div>
+            <div className="flex gap-2">
+              <button className="px-3 py-1 rounded bg-[#0ea5e9]/20">State / UTs</button>
+              <button className="px-3 py-1 rounded bg-[#111827]">Basin</button>
+            </div>
+          </div>
+          <div>
+            <div className="opacity-70 mb-1">Source</div>
+            <div className="bg-[#0b0f17] rounded px-3 py-2">All Agencies</div>
+          </div>
+          <div>
+            <div className="opacity-70 mb-1">State / UTs</div>
+            <div className="bg-[#0b0f17] rounded px-3 py-2">Select State</div>
+          </div>
+          <div>
+            <div className="opacity-70 mb-1">District</div>
+            <div className="bg-[#0b0f17] rounded px-3 py-2">Select</div>
+          </div>
+          <div>
+            <div className="opacity-70 mb-1">Timestep</div>
+            <div className="bg-[#0b0f17] rounded px-3 py-2">Yearly</div>
+          </div>
+          <div>
+            <div className="opacity-70 mb-1">Date Range</div>
+            <div className="flex gap-2">
+              <div className="bg-[#0b0f17] rounded px-3 py-2">2015</div>
+              <div className="bg-[#0b0f17] rounded px-3 py-2">2025</div>
+            </div>
+          </div>
         </div>
+          </aside>
+        }
+        center={
+          <main className="rounded-md overflow-hidden bg-[#0b0f17] h-full">
+            <IndiaMap className="h-[calc(100vh-32px)]" stations={stations} onSelect={setSelected} />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        }
+        right={
+          <section className="rounded-md bg-[#161a22] p-4 space-y-4 h-full overflow-auto">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#0b0f17] p-4 rounded">
+                <div className="text-xs opacity-70">Selected Station</div>
+                <div className="text-base font-semibold">{selected?.name ?? "None"}</div>
+              </div>
+              <div className="bg-[#0b0f17] p-4 rounded">
+                <div className="text-xs opacity-70">Total Stations</div>
+                <div className="text-base font-semibold">{stations.length}</div>
+              </div>
+            </div>
+
+            <div className="bg-[#0b0f17] rounded p-3">
+              <div className="text-sm font-medium mb-2">State Wise Station Count</div>
+              <StateBarChart />
+            </div>
+
+            <div className="bg-[#0b0f17] rounded p-3">
+              <div className="text-sm font-medium mb-2">Station Parameters Over Time</div>
+              <ParameterLineChart
+                labels={measurements.map((r) => r.date_collected ?? r.date ?? "")}
+                series={[
+                  { label: "HPI", data: measurements.map((r) => Number(r.hpi ?? 0)), color: "#22c55e", yAxisID: "y" },
+                  { label: "HEI", data: measurements.map((r) => Number(r.hei ?? 0)), color: "#f59e0b", yAxisID: "y2" },
+                ]}
+                useTimeAxis
+              />
+              <div className="text-xs opacity-70 mt-2">Data reflects selected station</div>
+            </div>
+
+            <div className="bg-[#0b0f17] rounded p-3">
+              <div className="text-sm font-medium mb-2">Metals Over Time</div>
+              <MetalsChart rows={measurements} />
+            </div>
+
+            <div className="bg-[#0b0f17] rounded p-3">
+              <div className="text-sm font-medium mb-2">Raw Data Preview</div>
+              <div className="overflow-auto max-h-[260px]">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-left opacity-70">
+                      <th className="px-2 py-1">Date</th>
+                      <th className="px-2 py-1">HPI</th>
+                      <th className="px-2 py-1">HEI</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {measurements.slice(0, 20).map((r, i) => (
+                      <tr key={i} className="border-t border-white/10">
+                        <td className="px-2 py-1">{String(r.date_collected ?? r.date ?? "").slice(0, 10)}</td>
+                        <td className="px-2 py-1">{r.hpi ?? ""}</td>
+                        <td className="px-2 py-1">{r.hei ?? ""}</td>
+                      </tr>
+                    ))}
+                    {measurements.length === 0 && (
+                      <tr>
+                        <td className="px-2 py-2 opacity-60" colSpan={3}>No records</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+        }
+      />
     </div>
   );
 }

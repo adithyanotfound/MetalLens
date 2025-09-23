@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://neondb_owner:npg_cjT3pm4fMSUE@ep-red-silence-a15jcon9-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+}
+
+model groundwater_quality {
+  id             Int       @id @default(autoincrement())
+  station_name   String?
+  agency_name    String?
+  state_name     String?
+  district_name  String?
+  date_collected DateTime? @db.Date
+  latitude       Float
+  longitude      Float
+  hpi            Float?
+  hei            Float?
+  completeness   String?
+  As             Float?
+  Cd             Float?
+  Cr             Float?
+  Cu             Float?
+  Fe             Float?
+  Pb             Float?
+  Mn             Float?
+  Hg             Float?
+  Ni             Float?
+  Zn             Float?
+  Se             Float?
+  Al             Float?
+  Ba             Float?
+  Ag             Float?
+  B              Float?
+  U              Float?
+
+  @@index([district_name], map: "idx_groundwater_district")
+  @@index([latitude, longitude], map: "idx_groundwater_lat_lon")
+  @@index([state_name], map: "idx_groundwater_state")
+  @@index([station_name, date_collected], map: "idx_groundwater_station_date")
+}
