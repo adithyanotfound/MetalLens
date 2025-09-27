@@ -24,9 +24,20 @@ export default function FiltersPanel({}: Props) {
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch("/api/filters/meta", { cache: "no-store" });
-      const json = await res.json();
-      setMeta(json);
+      try {
+        const res = await fetch("/api/filters/meta", { cache: "no-store" });
+        const json = await res.json();
+        // Check if the response has the expected structure
+        if (json.states && json.agencies && json.years) {
+          setMeta(json);
+        } else {
+          // Set fallback data if API fails
+          setMeta({ states: [], agencies: [], years: [] });
+        }
+      } catch (error) {
+        // Set fallback data on error
+        setMeta({ states: [], agencies: [], years: [] });
+      }
     };
     load();
   }, []);
@@ -34,9 +45,13 @@ export default function FiltersPanel({}: Props) {
   useEffect(() => {
     if (!stateSel) return setDistricts([]);
     const run = async () => {
-      const res = await fetch(`/api/filters/districts?state=${encodeURIComponent(stateSel)}`, { cache: "no-store" });
-      const json = await res.json();
-      setDistricts(json.districts ?? []);
+      try {
+        const res = await fetch(`/api/filters/districts?state=${encodeURIComponent(stateSel)}`, { cache: "no-store" });
+        const json = await res.json();
+        setDistricts(json.districts ?? []);
+      } catch (error) {
+        setDistricts([]);
+      }
     };
     run();
   }, [stateSel]);
