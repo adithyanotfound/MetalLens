@@ -4,9 +4,10 @@ import prisma from "@/app/lib/prisma";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export async function GET(req: Request, context: { params?: { id?: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const idStr = context?.params?.id ?? new URL(req.url).searchParams.get("id");
+    const { id } = await params;
+    const idStr = id ?? new URL(req.url).searchParams.get("id");
     const stationId = Number(idStr);
     if (Number.isNaN(stationId)) return NextResponse.json({ rows: [] });
 

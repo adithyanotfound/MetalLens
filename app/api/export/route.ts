@@ -21,7 +21,7 @@ const METAL_COLS = [
   "U",
 ];
 
-export const dynamic = "force-dynamic";
+export const revalidate = 600; // cache 10 minutes
 export const runtime = "nodejs";
 
 export async function GET(req: NextRequest) {

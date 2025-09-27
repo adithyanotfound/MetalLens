@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 1800; // cache 30 minutes
 export const runtime = "nodejs";
 
 const METAL_COLS = [

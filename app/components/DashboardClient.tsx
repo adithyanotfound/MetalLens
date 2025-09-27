@@ -5,7 +5,7 @@ import IndiaMap from "./IndiaMap";
 import StateBarChart from "./StateBarChart";
 import ParameterLineChart from "./ParameterLineChart";
 
-type Station = { id: string; name: string; lat: number; lng: number };
+type Station = { id: string | number; name: string; lat: number; lng: number; hpi?: number | null; hei?: number | null };
 
 export default function DashboardClient() {
   const [stations, setStations] = useState<Station[]>([]);
@@ -14,9 +14,13 @@ export default function DashboardClient() {
 
   useEffect(() => {
     const load = async () => {
-      const res = await fetch("/api/stations", { cache: "no-store" });
-      const json = await res.json();
-      setStations(json.rows ?? []);
+      try {
+        const res = await fetch(`/api/stations`, { cache: "no-store" });
+        const json = await res.json();
+        setStations(json.rows ?? []);
+      } catch {
+        setStations([]);
+      }
     };
     load();
   }, []);
@@ -51,7 +55,7 @@ export default function DashboardClient() {
       </aside>
 
       <main className="rounded-md overflow-hidden bg-[#0b0f17] relative">
-        <IndiaMap className="h-[calc(100vh-32px)]" />
+        <IndiaMap className="h-[calc(100vh-32px)]" stations={stations} onSelect={handleSelect} />
       </main>
 
       <section className="rounded-md bg-[#161a22] p-4 space-y-4">

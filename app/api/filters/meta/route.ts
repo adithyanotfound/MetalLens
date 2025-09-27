@@ -1,24 +1,37 @@
 import { NextResponse } from "next/server";
 import prisma from "@/app/lib/prisma";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600; // cache for 1 hour
 export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const statesRows = await prisma.groundwater_quality.findMany({ distinct: ["state_name"], select: { state_name: true } });
-    const agenciesRows = await prisma.groundwater_quality.findMany({ distinct: ["agency_name"], select: { agency_name: true } });
-    const yearsRows = await prisma.groundwater_quality.findMany({ distinct: ["date_collected"], select: { date_collected: true } });
+    const rows: Array<{ states: string[]; agencies: string[]; years: number[] }> = await prisma.$queryRawUnsafe(
+      `
+        SELECT
+          ARRAY(
+            SELECT DISTINCT state_name
+            FROM groundwater_quality
+            WHERE state_name IS NOT NULL
+            ORDER BY state_name
+          ) AS states,
+          ARRAY(
+            SELECT DISTINCT agency_name
+            FROM groundwater_quality
+            WHERE agency_name IS NOT NULL
+            ORDER BY agency_name
+          ) AS agencies,
+          ARRAY(
+            SELECT DISTINCT EXTRACT(YEAR FROM date_collected)::int
+            FROM groundwater_quality
+            WHERE date_collected IS NOT NULL
+            ORDER BY 1
+          ) AS years
+      `
+    );
 
-    const states = statesRows.map((r) => r.state_name).filter(Boolean);
-    const agencies = agenciesRows.map((r) => r.agency_name).filter(Boolean);
-    const years = yearsRows
-      .map((r) => (r.date_collected ? new Date(r.date_collected).getFullYear() : null))
-      .filter((x): x is number => x !== null);
-
-    const uniqueYears = Array.from(new Set(years)).sort();
-
-    return NextResponse.json({ states, agencies, years: uniqueYears });
+    const row = rows[0] ?? { states: [], agencies: [], years: [] };
+    return NextResponse.json({ states: row.states, agencies: row.agencies, years: row.years });
   } catch (e: any) {
     return NextResponse.json({ error: e?.message ?? "meta error" }, { status: 500 });
   }
