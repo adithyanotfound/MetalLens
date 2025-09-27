@@ -26,7 +26,7 @@ export async function GET() {
       return NextResponse.json({ error: "No table with columns hpi and hei found." }, { status: 404 });
     }
     const fqtn = `"${match.table_schema}"."${match.table_name}"`;
-    const data = await prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT * FROM ${fqtn} LIMIT 500;`);
+    const data = await prisma.$queryRawUnsafe(`SELECT * FROM ${fqtn} LIMIT 500;`) as Array<Record<string, unknown>>;
 
     // Build simple KPIs if present
     const numeric = data.filter((r) => typeof (r as { hpi?: unknown; hei?: unknown }).hpi === "number" && typeof (r as { hpi?: unknown; hei?: unknown }).hei === "number");
