@@ -77,7 +77,7 @@ export default function IndiaMap({ className, stations = [], onSelect, focus = n
     let mounted = true;
     const run = async () => {
       try {
-        const res = await fetch("https://cdn.jsdelivr.net/npm/india-geojson@1.0.0/india_states.geojson", { cache: 'force-cache' });
+        const res = await fetch("https://raw.githubusercontent.com/geohacker/india/master/state/india_state.geojson", { cache: 'force-cache' });
         const json = await res.json();
         if (mounted) setGeoJson(json);
       } catch {}
