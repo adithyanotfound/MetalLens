@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
       select: { district_name: true },
       take: 10000,
     });
-    const districts = rows.map((r) => r.district_name).filter(Boolean);
+    const districts = rows.map((r: { district_name: string | null }) => r.district_name).filter(Boolean);
     return NextResponse.json({ districts });
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error)?.message ?? "districts error" }, { status: 500 });
