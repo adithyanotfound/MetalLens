@@ -11,7 +11,7 @@ export async function GET() {
     );
     const count = Number(result[0]?.count ?? 0);
     return NextResponse.json({ count });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Unexpected error in /api/stations/count" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "Unexpected error in /api/stations/count" }, { status: 500 });
   }
 }

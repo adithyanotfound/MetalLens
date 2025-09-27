@@ -12,14 +12,14 @@ export async function GET(req: Request) {
 
     // Return distinct station points by unique latitude/longitude to avoid duplicates
     // If year is provided, compute average HPI/HEI for that year per station (lat/lng group)
-    const params: any[] = [];
+    const params: unknown[] = [];
     let yearClause = "";
     if (typeof year === "number" && !Number.isNaN(year)) {
       params.push(year);
       yearClause = "AND EXTRACT(YEAR FROM date_collected)::int = $1";
     }
 
-    let sql = `
+    const sql = `
       SELECT
         MIN(id)::int AS id,
         COALESCE(MAX(station_name), 'Station') AS station_name,
@@ -38,8 +38,8 @@ export async function GET(req: Request) {
 
     const mapped = rows.map((r) => ({ id: r.id, name: r.station_name ?? "Station", lat: r.lat, lng: r.lng, hpi: r.hpi ?? null, hei: r.hei ?? null }));
     return NextResponse.json({ rows: mapped });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Unexpected error in /api/stations" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "Unexpected error in /api/stations" }, { status: 500 });
   }
 }
 

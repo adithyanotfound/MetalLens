@@ -32,7 +32,7 @@ export async function GET() {
 
     const row = rows[0] ?? { states: [], agencies: [], years: [] };
     return NextResponse.json({ states: row.states, agencies: row.agencies, years: row.years });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "meta error" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "meta error" }, { status: 500 });
   }
 }

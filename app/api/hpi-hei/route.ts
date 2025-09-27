@@ -26,21 +26,21 @@ export async function GET() {
       return NextResponse.json({ error: "No table with columns hpi and hei found." }, { status: 404 });
     }
     const fqtn = `"${match.table_schema}"."${match.table_name}"`;
-    const data = await prisma.$queryRawUnsafe<any[]>(`SELECT * FROM ${fqtn} LIMIT 500;`);
+    const data = await prisma.$queryRawUnsafe<Array<Record<string, unknown>>>(`SELECT * FROM ${fqtn} LIMIT 500;`);
 
     // Build simple KPIs if present
-    const numeric = data.filter((r) => typeof r.hpi === "number" && typeof r.hei === "number");
+    const numeric = data.filter((r) => typeof (r as { hpi?: unknown; hei?: unknown }).hpi === "number" && typeof (r as { hpi?: unknown; hei?: unknown }).hei === "number");
     const avg = (arr: number[]) => (arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0);
     const response = {
       table: match,
       count: data.length,
-      averageHpi: avg(numeric.map((r) => r.hpi)),
-      averageHei: avg(numeric.map((r) => r.hei)),
+      averageHpi: avg(numeric.map((r) => (r as { hpi: number; hei: number }).hpi)),
+      averageHei: avg(numeric.map((r) => (r as { hpi: number; hei: number }).hei)),
       rows: data,
     };
     return NextResponse.json(response);
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Unexpected error" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "Unexpected error" }, { status: 500 });
   }
 }
 

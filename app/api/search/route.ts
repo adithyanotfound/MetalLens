@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
          GROUP BY state_name
          ORDER BY state_name
          LIMIT 10`,
-        `%${q}%` as any
+        `%${q}%`
       );
 
     const results = [
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
       ...stationRows.map((r) => ({ type: "station", id: r.id, name: r.station_name, lat: r.latitude, lng: r.longitude })),
     ];
     return NextResponse.json({ results });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "search error" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "search error" }, { status: 500 });
   }
 }

@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     });
     const districts = rows.map((r) => r.district_name).filter(Boolean);
     return NextResponse.json({ districts });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "districts error" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "districts error" }, { status: 500 });
   }
 }

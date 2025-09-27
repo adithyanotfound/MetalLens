@@ -33,14 +33,15 @@ export async function GET(req: NextRequest) {
     const startYear = searchParams.get("startYear") ? Number(searchParams.get("startYear")) : undefined;
     const endYear = searchParams.get("endYear") ? Number(searchParams.get("endYear")) : undefined;
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (state) where.state_name = state;
     if (district) where.district_name = district;
     if (agency) where.agency_name = agency;
     if (startYear || endYear) {
-      where.date_collected = {};
-      if (startYear) where.date_collected.gte = new Date(`${startYear}-01-01`);
-      if (endYear) where.date_collected.lte = new Date(`${endYear}-12-31`);
+      const dateFilter: Record<string, Date> = {};
+      if (startYear) dateFilter.gte = new Date(`${startYear}-01-01`);
+      if (endYear) dateFilter.lte = new Date(`${endYear}-12-31`);
+      where.date_collected = dateFilter;
     }
 
     // Build raw SQL to coalesce NaN to NULL so Prisma driver can handle it
@@ -65,7 +66,7 @@ export async function GET(req: NextRequest) {
 
     // Build WHERE clause with parameters
     const clauses: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let idx = 1;
     if (state) {
       clauses.push(`state_name = $${idx++}`);
@@ -91,11 +92,11 @@ export async function GET(req: NextRequest) {
     const whereClause = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
 
     const sql = `SELECT ${selectFrag} FROM groundwater_quality ${whereClause} LIMIT 50000`;
-    const rows: Record<string, any>[] = await prisma.$queryRawUnsafe(sql, ...params);
+    const rows: Record<string, unknown>[] = await prisma.$queryRawUnsafe(sql, ...params);
 
     // Replace null with blank for metals columns for CSV readability
     const cleaned = rows.map((r) => {
-      const obj: any = { ...r };
+      const obj: Record<string, unknown> = { ...r };
       METAL_COLS.forEach((col) => {
         if (obj[col] === null || Number.isNaN(obj[col])) obj[col] = "";
       });
@@ -111,7 +112,7 @@ export async function GET(req: NextRequest) {
         "Content-Disposition": "attachment; filename=export.csv",
       },
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "export error" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "export error" }, { status: 500 });
   }
 }

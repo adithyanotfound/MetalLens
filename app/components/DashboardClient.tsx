@@ -10,7 +10,7 @@ type Station = { id: string | number; name: string; lat: number; lng: number; hp
 export default function DashboardClient() {
   const [stations, setStations] = useState<Station[]>([]);
   const [selected, setSelected] = useState<Station | null>(null);
-  const [measurements, setMeasurements] = useState<any[]>([]);
+  const [measurements, setMeasurements] = useState<Record<string, unknown>[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -39,11 +39,11 @@ export default function DashboardClient() {
 
   // Compute averages when a station is selected
   const avgHpi = useMemo(() => {
-    const xs = measurements.filter((r) => typeof r.hpi === "number").map((r) => r.hpi);
+    const xs = measurements.filter((r) => typeof (r as { hpi?: unknown }).hpi === "number").map((r) => (r as { hpi: number }).hpi);
     return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0;
   }, [measurements]);
   const avgHei = useMemo(() => {
-    const xs = measurements.filter((r) => typeof r.hei === "number").map((r) => r.hei);
+    const xs = measurements.filter((r) => typeof (r as { hei?: unknown }).hei === "number").map((r) => (r as { hei: number }).hei);
     return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0;
   }, [measurements]);
 

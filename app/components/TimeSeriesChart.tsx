@@ -1,9 +1,9 @@
 "use client";
 import { useMemo, useRef } from "react";
 import ParameterLineChart from "./ParameterLineChart";
-import { ChartJSOrUndefined } from "react-chartjs-2/dist/types";
+import { Chart as ChartJS } from "chart.js";
 
-type Row = Record<string, any> & { date_collected?: string | Date };
+type Row = Record<string, unknown> & { date_collected?: string | Date };
 
 const METAL_COLS = [
   "As",
@@ -45,7 +45,7 @@ type Props = {
 };
 
 export default function TimeSeriesChart({ rows }: Props) {
-  const chartRef = useRef<ChartJSOrUndefined<"line">>(null);
+  const chartRef = useRef<ChartJS<"line"> | null>(null);
 
   const { labels, datasets } = useMemo(() => {
     const years = Array.from({ length: 11 }, (_, i) => 2015 + i);

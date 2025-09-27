@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     const clauses: string[] = [
       `date_collected IS NOT NULL`,
     ];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let idx = 1;
     if (state) {
       clauses.push(`state_name = $${idx++}`);
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
       ORDER BY 1 ASC
     `;
 
-    const rows: Array<Record<string, any>> = await prisma.$queryRawUnsafe(sql, ...params);
+    const rows: Array<Record<string, unknown>> = await prisma.$queryRawUnsafe(sql, ...params);
 
     const mapped = rows.map((r) => ({
       date_collected: new Date(Number(r.year), 0, 1).toISOString(),
@@ -64,8 +64,8 @@ export async function GET(req: NextRequest) {
     }));
 
     return NextResponse.json({ rows: mapped });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "aggregate error" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "aggregate error" }, { status: 500 });
   }
 }
 

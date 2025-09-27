@@ -49,8 +49,8 @@ export default function ParameterLineChart({ className, labels, series, useTimeA
   const chosenLabels = labels && labels.length ? labels : fallbackLabels;
 
   const defaultSeries = [
-    { label: "HPI", data: chosenLabels.map((_, i) => 40 + i * 2), color: "#22c55e" },
-    { label: "HEI", data: chosenLabels.map((_, i) => 0.6 - i * 0.02), color: "#f59e0b" },
+    { label: "HPI", data: chosenLabels.map((_, i) => 40 + i * 2), color: "#22c55e", yAxisID: "y" },
+    { label: "HEI", data: chosenLabels.map((_, i) => 0.6 - i * 0.02), color: "#f59e0b", yAxisID: "y" },
   ];
 
   const datasets = (series?.length ? series : defaultSeries).map((s) => ({
@@ -77,7 +77,7 @@ export default function ParameterLineChart({ className, labels, series, useTimeA
         mode: 'nearest' as const,
         intersect: false,
         callbacks: {
-          label: function(ctx: any) {
+          label: function(ctx: { dataset?: { label?: string }; parsed?: { y?: number }; raw?: unknown }) {
             const label = ctx.dataset?.label ? `${ctx.dataset.label}: ` : '';
             const value = typeof ctx.parsed?.y === 'number' ? ctx.parsed.y : ctx.raw;
             const fixed = typeof value === 'number' ? value.toFixed(4) : value;

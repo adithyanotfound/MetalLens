@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 type ResultStation = { type: "station"; id: number; name: string; lat: number; lng: number };
-type ResultState = { type: "state"; name: string; state: string };
+type ResultState = { type: "state"; name: string; state: string; lat?: number; lng?: number };
 type Result = ResultStation | ResultState;
 
 type Props = {
@@ -22,8 +22,8 @@ export default function SearchBar({ onSelectStation, onSelectState }: Props) {
         const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, { signal: controller.signal, cache: "no-store" });
         const json = await res.json();
         setResults(json.results ?? []);
-      } catch (err: any) {
-        if (err?.name !== 'AbortError' && err?.code !== 'ABORT_ERR') {
+      } catch (err: unknown) {
+        if ((err as Error)?.name !== 'AbortError' && (err as { code?: string })?.code !== 'ABORT_ERR') {
           // swallow non-abort network errors silently
           setResults([]);
         }
@@ -53,10 +53,11 @@ export default function SearchBar({ onSelectStation, onSelectState }: Props) {
                 if (r.type === "station") {
                   onSelectStation?.(r);
                 } else {
-                  const center = (r as any).lat && (r as any).lng
-                    ? { lat: (r as any).lat as number, lng: (r as any).lng as number }
+                  const rState = r as ResultState;
+                  const center = rState.lat && rState.lng
+                    ? { lat: rState.lat, lng: rState.lng }
                     : { lat: 22.9734, lng: 78.6569 };
-                  onSelectState?.(r.state, center);
+                  onSelectState?.(rState.state, center);
                 }
                 setQuery("");
                 setResults([]);

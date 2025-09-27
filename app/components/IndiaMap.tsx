@@ -58,12 +58,16 @@ function colorForStation(s: Station): string {
 
 export default function IndiaMap({ className, stations = [], onSelect, focus = null, focusZoom = null }: IndiaMapProps) {
   const center = useMemo(() => ({ lat: 22.9734, lng: 78.6569 }), []);
-  const [geoJson, setGeoJson] = useState<any | null>(null);
-  const Map: any = MapContainer as any;
-  const Tile: any = TileLayer as any;
-  const Circle: any = CircleMarker as any;
-  const GJ: any = GeoJSON as any;
-  const handleEachFeature = (_: any, layer: any) => {
+  const [geoJson, setGeoJson] = useState<Record<string, unknown> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Map = MapContainer as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Tile = TileLayer as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Circle = CircleMarker as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const GJ = GeoJSON as any;
+  const handleEachFeature = (_: unknown, layer: { setStyle: (style: { fillOpacity: number }) => void; on: (events: { mouseover: () => void; mouseout: () => void }) => void }) => {
     layer.on({
       mouseover: () => layer.setStyle({ fillOpacity: 0.2 }),
       mouseout: () => layer.setStyle({ fillOpacity: 0.05 }),
@@ -99,7 +103,7 @@ export default function IndiaMap({ className, stations = [], onSelect, focus = n
           <div className="flex items-center gap-2"><span className="inline-block w-3 h-3 rounded-full" style={{ background: "#9ca3af" }} /> <span>No data</span></div>
       </div>
       <Map
-        center={[center.lat, center.lng]}
+        center={[center.lat, center.lng] as [number, number]}
         zoom={6}
         scrollWheelZoom={true}
         style={{ width: "100%", height: "100%", borderRadius: 8 }}
@@ -111,6 +115,7 @@ export default function IndiaMap({ className, stations = [], onSelect, focus = n
         />
         {geoJson && (
           <GJ
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             data={geoJson as any}
             style={{ color: "#1f2937", weight: 1, fillColor: "#3b82f6", fillOpacity: 0.05 }}
             onEachFeature={handleEachFeature}

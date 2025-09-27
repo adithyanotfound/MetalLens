@@ -8,17 +8,9 @@ import TimeSeriesChart from "./components/TimeSeriesChart";
 import ResizableColumns from "./components/ResizableColumns";
 import { useEffect, useState } from "react";
 
-type Row = {
-  region: string;
-  hpi: number;
-  hei: number;
-};
+// Removed unused Row type
 
-const sampleData: Row[] = [
-  { region: "India", hpi: 68.2, hei: 0.64 },
-  { region: "Maharashtra", hpi: 61.5, hei: 0.67 },
-  { region: "Karnataka", hpi: 63.3, hei: 0.69 },
-];
+// Sample data removed as it's not used
 
 type Station = { id: string | number; name: string; lat: number; lng: number };
 
@@ -28,7 +20,7 @@ export default function Home() {
   const [stations, setStations] = useState<Station[]>([]);
   const [selected, setSelected] = useState<Station | null>(null);
   const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [measurements, setMeasurements] = useState<any[]>([]);
+  const [measurements, setMeasurements] = useState<Record<string, unknown>[]>([]);
   const [focus, setFocus] = useState<{ lat: number; lng: number } | null>(null);
   const [totalStations, setTotalStations] = useState<number | null>(null);
 
@@ -80,10 +72,8 @@ export default function Home() {
   // Log each row from database when station is selected
   useEffect(() => {
     if (!selected || measurements.length === 0) return;
-    // eslint-disable-next-line no-console
     console.log("Selected station:", selected.name);
     measurements.forEach((row, index) => {
-      // eslint-disable-next-line no-console
       console.log(`Row ${index + 1}:`, row);
     });
   }, [selected, measurements]);

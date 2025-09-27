@@ -7,7 +7,7 @@ type ApiResponse = {
   count?: number;
   averageHpi?: number;
   averageHei?: number;
-  rows?: Array<Record<string, any>>;
+  rows?: Array<Record<string, unknown>>;
   error?: string;
 };
 
@@ -22,7 +22,7 @@ export default function HpiHeiSummary() {
         const json = (await res.json()) as ApiResponse;
         setData(json);
       } catch (e) {
-        setData({ error: (e as any)?.message ?? "Failed to load" });
+        setData({ error: (e as Error)?.message ?? "Failed to load" });
       } finally {
         setLoading(false);
       }

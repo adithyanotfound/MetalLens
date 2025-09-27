@@ -20,7 +20,7 @@ export async function GET(req: Request) {
          ) t
          GROUP BY district_name
          ORDER BY cnt DESC, district_name ASC`,
-        state as any
+        state
       );
 
       const monitored = await prisma.$queryRawUnsafe<{ district_name: string | null; cnt: bigint }[]>(
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
          ) t
          GROUP BY district_name
          ORDER BY cnt DESC, district_name ASC`,
-        state as any
+        state
       );
 
       const monitoredMap = Object.fromEntries(monitored.map((m) => [m.district_name ?? "Unknown", Number(m.cnt)]));
@@ -63,7 +63,7 @@ export async function GET(req: Request) {
       monitored: monitoredMap[t.state_name ?? "Unknown"] ?? 0,
     }));
     return NextResponse.json({ rows });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Unexpected error in /api/stations/state-count" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "Unexpected error in /api/stations/state-count" }, { status: 500 });
   }
 }

@@ -20,25 +20,25 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     // Return all rows for that station ordered by date
     // Prisma cannot handle NaN in Float fields. Use $queryRaw to get raw data and sanitize.
-    const rowsRaw: any[] = await prisma.$queryRawUnsafe(
+    const rowsRaw: Array<Record<string, unknown>> = await prisma.$queryRawUnsafe(
       `SELECT id, station_name, date_collected, hpi, hei,
               "As", "Cd", "Cr", "Cu", "Fe", "Pb", "Mn", "Hg", "Ni", "Zn", "Se", "Al", "Ba", "Ag", "B", "U"
        FROM "groundwater_quality"
        WHERE station_name = $1
        ORDER BY date_collected ASC
        LIMIT 1000`,
-      rec.station_name as any
+      rec.station_name
     );
-    const sanitize = (v: any) => (typeof v === "number" && Number.isNaN(v) ? null : v);
-    const rows = rowsRaw.map((r: any) => ({
+    const sanitize = (v: unknown) => (typeof v === "number" && Number.isNaN(v) ? null : v);
+    const rows = rowsRaw.map((r: Record<string, unknown>) => ({
       ...r,
       As: sanitize(r.As), Cd: sanitize(r.Cd), Cr: sanitize(r.Cr), Cu: sanitize(r.Cu), Fe: sanitize(r.Fe),
       Pb: sanitize(r.Pb), Mn: sanitize(r.Mn), Hg: sanitize(r.Hg), Ni: sanitize(r.Ni), Zn: sanitize(r.Zn),
       Se: sanitize(r.Se), Al: sanitize(r.Al), Ba: sanitize(r.Ba), Ag: sanitize(r.Ag), B: sanitize(r.B), U: sanitize(r.U),
     }));
     return NextResponse.json({ rows });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? "Unexpected error" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json({ error: (e as Error)?.message ?? "Unexpected error" }, { status: 500 });
   }
 }
 

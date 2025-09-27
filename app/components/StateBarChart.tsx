@@ -29,7 +29,7 @@ export default function StateBarChart({ className, state }: Props) {
           : "/api/stations/state-count";
         const res = await fetch(url, { cache: "no-store" });
         const json = await res.json();
-        const mapped = (json.rows ?? []).map((r: any) => ({
+        const mapped = (json.rows ?? []).map((r: { state?: string; district?: string; total: number; monitored: number }) => ({
           label: r.state ?? r.district ?? "Unknown",
           total: r.total,
           monitored: r.monitored,

@@ -1,6 +1,6 @@
 "use client";
 
-type Row = Record<string, any> & { date_collected?: string | Date };
+type Row = Record<string, unknown> & { date_collected?: string | Date };
 
 const METAL_COLS = [
   "As",
@@ -47,7 +47,7 @@ export default function DataPreview({ rows }: Props) {
               <td className="px-2 py-1">{String(r.date_collected ?? "").slice(0, 10)}</td>
               {keys.map((k) => (
                 <td key={k} className="px-2 py-1">
-                  {r[k] ?? ""}
+                  {String(r[k] ?? "")}
                 </td>
               ))}
             </tr>

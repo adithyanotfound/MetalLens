@@ -7,7 +7,10 @@ interface Meta {
   years: number[];
 }
 
-interface Props {}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface Props {
+  // No props currently needed
+}
 
 export default function FiltersPanel({}: Props) {
   const [meta, setMeta] = useState<Meta | null>(null);
