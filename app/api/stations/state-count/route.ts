@@ -11,6 +11,7 @@ export async function GET(req: Request) {
 
     if (state) {
       // District-wise counts within a state based on unique lat/lng
+      //@ts-ignore
       const totals = await prisma.$queryRawUnsafe<{ district_name: string | null; cnt: bigint }[]>(
         `SELECT district_name, COUNT(*)::bigint AS cnt
          FROM (
