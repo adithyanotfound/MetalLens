@@ -87,12 +87,12 @@ export default function Home() {
               onSelectStation={(s) => {
                 setSelectedState(null);
                 setSelected(s);
-                setFocus({ lat: s.lat, lng: s.lng });
+                // Removed setFocus to prevent automatic zoom on search
               }}
               onSelectState={(stateName, center) => {
                 setSelected(null);
                 setSelectedState(stateName);
-                if (center) setFocus(center);
+                // Removed setFocus to prevent automatic zoom on search
               }}
             />
             <FiltersPanel />
