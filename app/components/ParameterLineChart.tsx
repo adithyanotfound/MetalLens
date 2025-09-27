@@ -28,9 +28,10 @@ type Props = {
   labels?: (string | number | Date)[];
   series?: Array<{ label: string; data: number[]; color?: string; yAxisID?: string }>;
   useTimeAxis?: boolean;
+  chartId?: string;
 };
 
-export default function ParameterLineChart({ className, labels, series, useTimeAxis }: Props) {
+export default function ParameterLineChart({ className, labels, series, useTimeAxis, chartId }: Props) {
   const fallbackLabels = [
     "2015",
     "2016",
@@ -71,7 +72,19 @@ export default function ParameterLineChart({ className, labels, series, useTimeA
     maintainAspectRatio: false,
     plugins: {
       legend: { display: true, position: "bottom" as const },
-      tooltip: { enabled: true },
+      tooltip: {
+        enabled: true,
+        mode: 'nearest' as const,
+        intersect: false,
+        callbacks: {
+          label: function(ctx: any) {
+            const label = ctx.dataset?.label ? `${ctx.dataset.label}: ` : '';
+            const value = typeof ctx.parsed?.y === 'number' ? ctx.parsed.y : ctx.raw;
+            const fixed = typeof value === 'number' ? value.toFixed(4) : value;
+            return `${label}${fixed}`;
+          }
+        }
+      },
     },
     elements: { point: { radius: 0 } },
     scales: {
@@ -86,7 +99,7 @@ export default function ParameterLineChart({ className, labels, series, useTimeA
   return (
     <div className={className}>
       <div className="h-[300px]">
-        <Line data={data} options={options} />
+        <Line id={chartId} data={data} options={options} />
       </div>
     </div>
   );
