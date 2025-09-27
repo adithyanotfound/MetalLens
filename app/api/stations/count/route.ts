@@ -6,9 +6,9 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const result = await prisma.$queryRawUnsafe<{ count: bigint }[]>(
+    const result = await prisma.$queryRawUnsafe(
       "SELECT COUNT(*)::bigint AS count FROM (SELECT DISTINCT latitude, longitude FROM groundwater_quality WHERE latitude IS NOT NULL AND longitude IS NOT NULL) t"
-    );
+    ) as { count: bigint }[];
     const count = Number(result[0]?.count ?? 0);
     return NextResponse.json({ count });
   } catch (e: unknown) {
