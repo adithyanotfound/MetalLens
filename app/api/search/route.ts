@@ -35,8 +35,8 @@ export async function GET(req: NextRequest) {
       );
 
     const results = [
-      ...stateRows.map((r) => ({ type: "state", name: r.state_name, state: r.state_name, lat: r.lat, lng: r.lng })),
-      ...stationRows.map((r) => ({ type: "station", id: r.id, name: r.station_name, lat: r.latitude, lng: r.longitude })),
+      ...stateRows.map((r: { state_name: string | null; lat: number | null; lng: number | null }) => ({ type: "state", name: r.state_name, state: r.state_name, lat: r.lat, lng: r.lng })),
+      ...stationRows.map((r: { id: number; station_name: string | null; latitude: number | null; longitude: number | null }) => ({ type: "station", id: r.id, name: r.station_name, lat: r.latitude, lng: r.longitude })),
     ];
     return NextResponse.json({ results });
   } catch (e: unknown) {
